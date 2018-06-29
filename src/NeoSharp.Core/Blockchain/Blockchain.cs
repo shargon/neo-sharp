@@ -223,7 +223,7 @@ namespace NeoSharp.Core.Blockchain
         /// <summary>
         /// Return the corresponding block information according to the specified height
         /// </summary>
-        /// <param name="height"></param>
+        /// <param name="height">Height</param>
         /// <returns></returns>
         public Block GetBlock(uint height)
         {
@@ -235,11 +235,47 @@ namespace NeoSharp.Core.Blockchain
         /// <summary>
         /// Return the corresponding block information according to the specified height
         /// </summary>
-        /// <param name="hash"></param>
+        /// <param name="hash">Hash</param>
         /// <returns></returns>
         public Block GetBlock(UInt256 hash)
         {
             return null;
+        }
+
+        /// <summary>
+        /// Return the corresponding contract information according to the specified hash
+        /// </summary>
+        /// <param name="hash">Hash</param>
+        /// <returns></returns>
+        public Contract GetContract(UInt256 hash)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Return the corresponding asset information according to the specified hash
+        /// </summary>
+        /// <param name="hash">Hash</param>
+        /// <returns></returns>
+        public Asset GetAsset(UInt256 hash)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Return all assets
+        /// </summary>
+        public IEnumerable<Asset> GetAssets()
+        {
+            yield break;
+        }
+
+        /// <summary>
+        /// Return all contracts
+        /// </summary>
+        public IEnumerable<Contract> GetContracts()
+        {
+            yield break;
         }
 
         public Task<IReadOnlyCollection<Block>> GetBlocks(IReadOnlyCollection<UInt256> blockHashes)
