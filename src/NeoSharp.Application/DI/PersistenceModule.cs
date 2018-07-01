@@ -1,8 +1,7 @@
 ﻿using NeoSharp.Core.DI;
 using NeoSharp.Core.Persistence;
-using NeoSharp.Core.Persistence.Contexts;
-using NeoSharp.Persistence.RocksDB;
 using NeoSharp.Persistence.RedisDB;
+using NeoSharp.Persistence.RocksDB;
 
 namespace NeoSharp.Application.DI
 {
@@ -10,32 +9,33 @@ namespace NeoSharp.Application.DI
     {
         public void Register(IContainerBuilder containerBuilder)
         {
-            containerBuilder.RegisterSingleton<IRepositoryConfiguration, RocksDbConfiguration>();
-            //TODO: Register if configured to use Redis for either binary or json persistence
-            //containerBuilder.RegisterSingleton<IRepositoryConfiguration, RedisDbConfiguration>();
+            containerBuilder.RegisterSingleton<PersistenceConfig>();
+            containerBuilder.RegisterSingleton<IRepository, NeoSharpRepository>();
 
-            containerBuilder.RegisterSingleton<IBlockHeaderContext, BlockHeaderContext>();
-            containerBuilder.RegisterSingleton<ITransactionContext, TransactionContext>();
+            if (PersistenceConfig.Instance().BinaryStorageProvider == BinaryStorageProvider.RocksDb)
+            {
+                // register RocksDbBinaryRepository
+                containerBuilder.RegisterSingleton<RocksDbConfig>();
+                containerBuilder.RegisterSingleton<IRocksDbRepository, RocksDbRepository>();
+            }
 
-            //TODO: Register our persistence types based on the configuration for binary and JSON
-            //TODO: These should not be singleton
-            //if (BinaryPersistenceContect = Rocks)
-            //{
-                containerBuilder.RegisterSingleton<IDbModel, RocksDbBinaryModel>();
-                containerBuilder.RegisterSingleton<IDbBinaryContext, RocksDbBinaryContext>();
-            //}
-            //else if (BinaryPersistenceContext == Redis)
-            //{
-            //    ConfigurationModule.RedisConnectionString->Redis Server B
-            //    containerBuilder.RegisterSingleton<IDbBinaryModel, RedisBinaryDbModel>();
-            //    containerBuilder.RegisterSingleton<IDbBinaryContext, RedisBinaryDbContext>();
-            //}
+            if (PersistenceConfig.Instance().BinaryStorageProvider == BinaryStorageProvider.RedisDb)
+            {
+                // register redisDbBinaryRepository
+                containerBuilder.RegisterSingleton<RedisDbConfig>();
+                containerBuilder.RegisterSingleton<IRedisDbRepository, RedisDbRepository>();
+            }
 
-            //if (JsonPersistenceContext = Redis)
-            //{
-            //    containerBuilder.RegisterSingleton<IDbBinaryModel, RedisJsonDbModel>();
-            //    containerBuilder.RegisterSingleton<IDbJsonContext, RedisJsonDbContext>();
-            //}
+            if (PersistenceConfig.Instance().JsonStorageProvider == JsonStorageProvider.RedisDb)
+            {
+                // register RedisDbJsonRepository
+                containerBuilder.RegisterSingleton<RedisDbRepository>();
+            }
+
+            if (PersistenceConfig.Instance().JsonStorageProvider == JsonStorageProvider.MongoDb)
+            {
+                // register MongoDbJsonRepository
+            }
         }
     }
 }

@@ -148,13 +148,14 @@ namespace NeoSharp.Core.Cryptography
         public abstract byte[] ComputePublicKey(byte[] privateKey, bool compress);
 
         /// <summary>
-        /// Decode Public key
+        /// Decode Public Key
         /// </summary>
-        /// <param name="encodedPK">Data</param>
-        /// <param name="compress">Compress</param>
+        /// <param name="pubkey">Data</param>
+        /// <param name="compress">Compress public key</param>
         /// <param name="x">X</param>
         /// <param name="y">Y</param>
-        public abstract byte[] DecodePublicKey(byte[] encodedPK, bool compress, out BigInteger x, out BigInteger y);
+        /// <returns>Public key bytearray</returns>
+        public abstract byte[] DecodePublicKey(byte[] pubkey, bool compress, out BigInteger x, out BigInteger y);
 
         /// <summary>
         /// Encrypt using ECB
@@ -283,5 +284,12 @@ namespace NeoSharp.Core.Cryptography
                 throw new FormatException();
             return buffer.Take(buffer.Length - 4).ToArray();
         }
+
+        /// <summary>
+        /// Generates random bytes
+        /// </summary>
+        /// <param name="length">Length</param>
+        /// <returns>Random bytearray</returns>
+        public abstract byte[] GenerateRandomBytes(int length);
     }
 }
