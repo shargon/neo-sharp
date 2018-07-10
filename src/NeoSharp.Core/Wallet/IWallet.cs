@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using NeoSharp.Core.Cryptography;
-using Newtonsoft.Json.Linq;
 
 namespace NeoSharp.Core.Wallet
 {
@@ -31,12 +31,12 @@ namespace NeoSharp.Core.Wallet
         /// accounts is an list of Account objects which describe the details 
         /// of each account in the wallet.
         /// </summary>
-        IEnumerable<IWalletAccount> Accounts { get; set; }
+        HashSet<IWalletAccount> Accounts { get; set; }
 
         /// <summary>
         /// extra is an object that is defined by the implementor of the client
         /// for storing extra data. This field can be null.
         /// </summary>
-        JObject Extra { get; set; }
+        Object Extra { get; set; }
     }
 }

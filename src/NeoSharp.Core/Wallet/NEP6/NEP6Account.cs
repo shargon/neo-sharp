@@ -1,49 +1,52 @@
-﻿using NeoSharp.Core.Cryptography;
+﻿using System;
 using NeoSharp.Core.Models;
 using NeoSharp.Core.Types;
-using NeoSharp.Core.Extensions;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace NeoSharp.Core.Wallet.NEP6
 {
-    public class NEP6Account : IWalletAccount
+    public class NEP6Account : IWalletAccount, IEquatable<NEP6Account>
     {
-        private readonly ICrypto _crypto;
-        private Contract _contract;
-        private UInt160 _scriptHash;
 
-        public UInt160 ScriptHash
-        {
-            get => _scriptHash;
-            set
-            {
-                _scriptHash = value;
-                Address = _scriptHash.ToAddress(_crypto);
-            }
-        }
+        /// <inheritdoc />
+        public UInt160 ScriptHash => Contract.ScriptHash;
 
-        public string Address { get; private set; }
+        /// <inheritdoc />>
         public string Label { get; set; }
+
+        /// <inheritdoc />
         public bool IsDefault { get; set; }
+
+        /// <inheritdoc />
         public bool Lock { get; set; }
+
+        /// <inheritdoc />
         public string Key { get; set; }
-        public Contract Contract
-        {
-            get => _contract;
-            set
-            {
-                _contract = value;
-                ScriptHash = _contract.ScriptHash;
-            }
-        }
+
+        /// <inheritdoc />
+        public Contract Contract { get; set; }
 
         [JsonProperty("extra")]
-        public JObject Extra { get; set; }
+        public Object Extra { get; set; }
 
-        public NEP6Account(ICrypto crypto)
+        public override bool Equals(object obj)
         {
-            _crypto = crypto;
+            if (obj is NEP6Account acc)
+            {
+                return ScriptHash.Equals(acc.ScriptHash);
+            }
+
+            return false;
+        }
+         
+        public bool Equals(NEP6Account obj)
+        {
+            return ScriptHash.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return ScriptHash.GetHashCode();
         }
     }
 }
