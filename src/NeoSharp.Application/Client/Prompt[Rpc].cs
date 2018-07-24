@@ -1,19 +1,37 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using NeoSharp.Application.Attributes;
 using NeoSharp.BinarySerialization;
 using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Models;
+using NeoSharp.Core.SmartContract.ContractParameters;
 using NeoSharp.Core.Types;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace NeoSharp.Application.Client
 {
     public partial class Prompt : IPrompt
     {
-        // TODO: invoke,invokefunction,sendfrom,sendtoaddress,sendmany
+        // TODO: invoke and invokefunction => ContractParameter json serializable/deserializable acording to NEO
+
+        class SendManyParams
+        {
+            [JsonProperty("asset")]
+            public UInt256 Asset { get; set; }
+
+            [JsonProperty("address")]
+            public UInt160 Address { get; set; }
+
+            [JsonProperty("value")]
+            public BigInteger Value { get; set; }
+        }
+
+        #region Base calls
 
         /// <summary>
         /// Make rpc call
@@ -64,6 +82,8 @@ namespace NeoSharp.Application.Client
             }
         }
 
+        #endregion
+
         /// <summary>
         /// Start rpc
         /// </summary>
@@ -82,6 +102,8 @@ namespace NeoSharp.Application.Client
             _rpc?.Stop();
         }
 
+        #region Commands
+
         /// <summary> 
         /// Make rpc call for `getapplicationlog` 
         /// </summary> 
@@ -98,6 +120,58 @@ namespace NeoSharp.Application.Client
         private Task RpcGetrawmempoolCommand(IPEndPoint endPoint)
         {
             return RpcCallCommand(endPoint, "getrawmempool", null);
+        }
+
+        /// <summary> 
+        /// Make rpc call for `sendtoaddress` 
+        /// </summary> 
+        [PromptCommand("rpc sendtoaddress", Category = "Rpc", Help = "Make rpc calls for sendtoaddress")]
+        private Task RpcSendtoaddressCommand(IPEndPoint endPoint, UInt256 asset, UInt160 to, BigInteger value, ulong fee = 0, UInt160 changeAddress = null)
+        {
+            // Serialize acording to (https://github.com/neo-project/neo-cli/blob/master/neo-cli/Network/RPC/RpcServerWithWallet.cs#L105)
+
+            var ls = new List<object>
+                {
+                    asset.ToString(false),
+                    to.ToString(false),
+                    value,
+                    fee
+                };
+
+            if (changeAddress != null) ls.Add(changeAddress.ToString(false));
+
+            return RpcCallCommand(endPoint, "sendtoaddress", ls.ToArray().ToJson(false));
+        }
+
+        /// <summary> 
+        /// Make rpc call for `sendfrom` 
+        /// </summary> 
+        [PromptCommand("rpc sendfrom", Category = "Rpc", Help = "Make rpc calls for sendfrom")]
+        private Task RpcSendfromCommand(IPEndPoint endPoint, UInt256 asset, UInt160 from, UInt160 to, BigInteger value, ulong fee = 0, UInt160 changeAddress = null)
+        {
+            // Serialize acording to (https://github.com/neo-project/neo-cli/blob/master/neo-cli/Network/RPC/RpcServerWithWallet.cs#L69)
+
+            var ls = new List<object>
+                {
+                    asset.ToString(false),
+                    from.ToString(false),
+                    to.ToString(false),
+                    value,
+                    fee
+                };
+
+            if (changeAddress != null) ls.Add(changeAddress.ToString(false));
+
+            return RpcCallCommand(endPoint, "sendfrom", ls.ToArray().ToJson(false));
+        }
+
+        /// <summary> 
+        /// Make rpc call for `sendmany` 
+        /// </summary> 
+        [PromptCommand("rpc sendmany", Category = "Rpc", Help = "Make rpc calls for sendmany")]
+        private Task RpcSendmanyCommand(IPEndPoint endPoint, [PromptCommandParameterBody(FromJson = true)] SendManyParams[] addresses)
+        {
+            return RpcCallCommand(endPoint, "sendmany", addresses.ToJson(false));
         }
 
         /// <summary> 
@@ -161,6 +235,32 @@ namespace NeoSharp.Application.Client
         private Task RpcInvokescriptCommand(IPEndPoint endPoint, byte[] script)
         {
             return RpcCallCommand(endPoint, "invokescript", "[\"" + script.ToHexString(false) + "\"]");
+        }
+
+        /// <summary> 
+        /// Make rpc call for `invoke` 
+        /// </summary> 
+        [PromptCommand("rpc invoke", Category = "Rpc", Help = "Make rpc call for invoke")]
+        private Task RpcInvokeCommand
+            (
+            IPEndPoint endPoint, UInt160 scriptHash,
+            [PromptCommandParameterBody(FromJson = true)] ContractParameter[] args
+            )
+        {
+            return RpcCallCommand(endPoint, "invokefunction", (new object[] { scriptHash.ToString(false), args }.ToJson(false)));
+        }
+
+        /// <summary> 
+        /// Make rpc call for `invokefunction` 
+        /// </summary> 
+        [PromptCommand("rpc invokefunction", Category = "Rpc", Help = "Make rpc call for invokefunction")]
+        private Task RpcInvokefunctionCommand
+            (
+            IPEndPoint endPoint, UInt160 scriptHash, string operation,
+            [PromptCommandParameterBody(FromJson = true)] ContractParameter[] args
+            )
+        {
+            return RpcCallCommand(endPoint, "invokefunction", (new object[] { scriptHash.ToString(false), operation, args }.ToJson(false)));
         }
 
         /// <summary> 
@@ -315,5 +415,7 @@ namespace NeoSharp.Application.Client
         {
             return RpcCallCommand(endPoint, "getassetstate", "[\"" + address.ToString(false) + "\"]");
         }
+
+        #endregion
     }
 }
