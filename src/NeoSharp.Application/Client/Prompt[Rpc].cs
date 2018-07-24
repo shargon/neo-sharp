@@ -88,19 +88,13 @@ namespace NeoSharp.Application.Client
         /// Start rpc
         /// </summary>
         [PromptCommand("rpc start", Category = "Rpc")]
-        private void RpcStartCommand()
-        {
-            _rpc?.Start();
-        }
+        private void RpcStartCommand() => _rpc?.Start();
 
         /// <summary>
         /// Stop rpc
         /// </summary>
         [PromptCommand("rpc stop", Category = "Rpc")]
-        private void RpcStopCommand()
-        {
-            _rpc?.Stop();
-        }
+        private void RpcStopCommand() => _rpc?.Stop();
 
         #region Commands
 
