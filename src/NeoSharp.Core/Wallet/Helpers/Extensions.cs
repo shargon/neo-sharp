@@ -30,13 +30,13 @@ namespace NeoSharp.Core.Wallet.Helpers
         {
             var buffer = Crypto.Default.Base58CheckDecode(address);
 
-            if (buffer[0] != 0x017)
+            if (buffer.Length != 21 || buffer[0] != 0x017)
             {
                 throw (new ArgumentException(nameof(address)));
             }
             else
             {
-                return new UInt160(buffer.Skip(1).Take(20).ToArray());
+                return new UInt160(buffer.Skip(1).ToArray());
             }
         }
 
