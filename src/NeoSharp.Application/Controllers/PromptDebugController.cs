@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using NeoSharp.Application.Attributes;
+using NeoSharp.Application.Client;
 using NeoSharp.Core.Cryptography;
 using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Models;
@@ -10,10 +11,31 @@ using NeoSharp.Core.Types;
 using NeoSharp.VM;
 using NeoSharp.VM.Types;
 
-namespace NeoSharp.Application.Client
+namespace NeoSharp.Application.Controllers
 {
-    public partial class Prompt : IPrompt
+    public class PromptDebugController : IPromptController
     {
+        #region Private fields
+
+        private readonly IVMFactory _vmFactory;
+        private readonly IConsoleWriter _consoleWriter;
+        private readonly IConsoleReader _consoleReader;
+
+        #endregion
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="vmFactory">VM Factory</param>
+        /// <param name="consoleWriter">Console writter</param>
+        /// <param name="consoleReader">Console reader</param>
+        public PromptDebugController(IVMFactory vmFactory, IConsoleWriter consoleWriter, IConsoleReader consoleReader)
+        {
+            _vmFactory = vmFactory;
+            _consoleReader = consoleReader;
+            _consoleWriter = consoleWriter;
+        }
+
         class DebugScriptTable : IScriptTable
         {
             public readonly Dictionary<UInt160, byte[]> VirtualContracts = new Dictionary<UInt160, byte[]>();
@@ -51,7 +73,7 @@ namespace NeoSharp.Application.Client
         /// </summary>
         /// <param name="script">Script</param>
         [PromptCommand("virtual contract add", Help = "Add virtual contract to the script table", Category = "Debug")]
-        private void VirtualContractAddCommand(byte[] script)
+        public void VirtualContractAddCommand(byte[] script)
         {
             var hash = new UInt160(Crypto.Default.Hash160(script));
 
@@ -68,7 +90,7 @@ namespace NeoSharp.Application.Client
         /// </summary>
         /// <param name="file">File</param>
         [PromptCommand("virtual contract add", Help = "Add virtual contract to the script table", Category = "Debug")]
-        private void VirtualContractAddCommand(FileInfo file)
+        public void VirtualContractAddCommand(FileInfo file)
         {
             if (!file.Exists) throw new ArgumentException("File must exists");
 
@@ -79,7 +101,7 @@ namespace NeoSharp.Application.Client
         /// Clear virtual contract
         /// </summary>
         [PromptCommand("virtual contract clear", Help = "Clear all virtual smart contracts from the script table", Category = "Debug")]
-        private void VirtualContractClearCommand()
+        public void VirtualContractClearCommand()
         {
             _scriptTable.VirtualContracts.Clear();
         }
@@ -88,7 +110,7 @@ namespace NeoSharp.Application.Client
         /// List virtual contract
         /// </summary>
         [PromptCommand("virtual contract list", Help = "List all virtual smart contracts on the script table", Category = "Debug")]
-        private void VirtualContractListCommand()
+        public void VirtualContractListCommand()
         {
             foreach (var h in _scriptTable.VirtualContracts.Keys)
             {
@@ -101,7 +123,7 @@ namespace NeoSharp.Application.Client
         /// </summary>
         /// <param name="contractHash">Contract</param>
         [PromptCommand("decompile", Help = "Decompile contract", Category = "Debug")]
-        private void DecompileCommand(UInt160 contractHash)
+        public void DecompileCommand(UInt160 contractHash)
         {
             var script = _scriptTable.GetScript(contractHash.ToArray(), false);
 
@@ -132,7 +154,7 @@ namespace NeoSharp.Application.Client
         /// <param name="operation">Operation</param>
         /// <param name="parameters">Parameters</param>
         [PromptCommand("testinvoke", Help = "Test invoke contract", Category = "Debug")]
-        private void TestInvoke(UInt160 contractHash, ETriggerType trigger, string operation, [PromptCommandParameterBody] object[] parameters = null)
+        public void TestInvoke(UInt160 contractHash, ETriggerType trigger, string operation, [PromptCommandParameterBody] object[] parameters = null)
         {
             if (_scriptTable.GetScript(contractHash.ToArray(), false) == null) throw (new ArgumentNullException("Contract not found"));
 

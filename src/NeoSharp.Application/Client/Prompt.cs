@@ -33,10 +33,6 @@ namespace NeoSharp.Application.Client
         /// </summary>
         private readonly IConsoleWriter _consoleWriter;
         /// <summary>
-        /// VM Factory
-        /// </summary>
-        private readonly IVMFactory _vmFactory;
-        /// <summary>
         /// Logger
         /// </summary>
         private readonly Core.Logging.ILogger<Prompt> _logger;
@@ -93,8 +89,7 @@ namespace NeoSharp.Application.Client
             IConsoleReader consoleReaderInit,
             IConsoleWriter consoleWriterInit,
             Core.Logging.ILogger<Prompt> logger,
-            IBlockchain blockchain,
-            IVMFactory vmFactory
+            IBlockchain blockchain
             )
         {
             _container = container;
@@ -103,7 +98,6 @@ namespace NeoSharp.Application.Client
             _logger = logger;
             _blockchain = blockchain;
             _logs = new ConcurrentBag<LogEntry>();
-            _vmFactory = vmFactory;
 
             // Get controllers
 
