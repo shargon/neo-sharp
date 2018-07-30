@@ -141,10 +141,10 @@ namespace NeoSharp.Application.Attributes
         /// <summary>
         /// Convert string arguments to Method arguments
         /// </summary>
-        /// <param name="args">Arguments</param>
+        /// <param name="tokens">Command tokens</param>
         /// <param name="injector">Injector</param>
         /// <returns>Return parsed arguments</returns>
-        public object[] ConvertToArguments(CommandToken[] args, IContainer injector)
+        public object[] ConvertToArguments(CommandToken[] tokens, IContainer injector)
         {
             var maxPars = Parameters.Length;
             var ret = new object[maxPars];
@@ -170,38 +170,38 @@ namespace NeoSharp.Application.Attributes
 
             // Fill argument values
 
-            for (int xP = 0, xA = 0; xP < maxPars && xA < args.Length; xP++, xA++)
+            for (int parameterIndex = 0, tokenIndex = 0; parameterIndex < maxPars && tokenIndex < tokens.Length; parameterIndex++, tokenIndex++)
             {
-                if (injected.Contains(xP))
+                if (injected.Contains(parameterIndex))
                 {
-                    xA--;
+                    tokenIndex--;
                     continue;
                 }
 
-                var body = Parameters[xP].GetCustomAttribute<PromptCommandParameterBodyAttribute>();
+                var body = Parameters[parameterIndex].GetCustomAttribute<PromptCommandParameterBodyAttribute>();
 
                 if (body != null)
                 {
                     // From here to the end
 
-                    var join = string.Join(" ", args.Skip(xA));
+                    var join = string.Join(" ", tokens.Skip(tokenIndex));
 
 
                     if (body.FromJson)
                     {
                         join = join.Trim();
 
-                        if (Parameters[xP].ParameterType.IsArray && !(join.StartsWith("[") && join.EndsWith("]")))
+                        if (Parameters[parameterIndex].ParameterType.IsArray && !(join.StartsWith("[") && join.EndsWith("]")))
                         {
                             // Is an array but only one object is given
                             join = $"[{join}]";
                         }
 
-                        ret[xP] = JsonConvert.DeserializeObject(join, Parameters[xP].ParameterType);
+                        ret[parameterIndex] = JsonConvert.DeserializeObject(join, Parameters[parameterIndex].ParameterType);
                     }
                     else
                     {
-                        ret[xP] = ParseToArgument(new CommandToken(join, false), Parameters[xP].ParameterType);
+                        ret[parameterIndex] = ParseToArgument(new CommandToken(join, false), Parameters[parameterIndex].ParameterType);
                     }
 
                     return ret;
@@ -210,7 +210,7 @@ namespace NeoSharp.Application.Attributes
                 {
                     // Regular parameter
 
-                    ret[xP] = ParseToArgument(args[xA], Parameters[xP].ParameterType);
+                    ret[parameterIndex] = ParseToArgument(tokens[tokenIndex], Parameters[parameterIndex].ParameterType);
                 }
             }
 
