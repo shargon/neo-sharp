@@ -9,9 +9,9 @@ namespace NeoSharp.Application.Client
         /// Nodes
         /// </summary>
         [PromptCommand("nodes", Category = "Network", Help = "Get nodes information")]
-        private void NodesCommand()
+        private void NodesCommand([PromptHideHelpCommand] IServer server)
         {
-            var peers = _server.ConnectedPeers;
+            var peers = server.ConnectedPeers;
 
             _consoleWriter.WriteLine("Connected: " + peers.Count);
 
