@@ -5,13 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NeoSharp.Application.Attributes;
+using NeoSharp.Application.Controllers;
 using NeoSharp.Application.Extensions;
 using NeoSharp.Core.Blockchain;
 using NeoSharp.Core.DI;
 using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Logging;
 using NeoSharp.Core.Types;
-using NeoSharp.Core.Wallet;
 using NeoSharp.VM;
 
 namespace NeoSharp.Application.Client
@@ -45,21 +45,17 @@ namespace NeoSharp.Application.Client
         /// </summary>
         private readonly IBlockchain _blockchain;
         /// <summary>
-        /// The wallet.
-        /// </summary>
-        private readonly IWalletManager _walletManager;
-        /// <summary>
         /// Container
         /// </summary>
         private readonly IContainer _container;
         /// <summary>
         /// Command cache
         /// </summary>
-        private static readonly IDictionary<string[], PromptCommandAttribute> _commandCache;
+        private readonly IDictionary<string[], PromptCommandAttribute> _commandCache;
         /// <summary>
         /// Autocomplete handler
         /// </summary>
-        private static readonly IAutoCompleteHandler _commandAutocompleteCache;
+        private readonly IAutoCompleteHandler _commandAutocompleteCache;
         /// <summary>
         /// Log for output
         /// </summary>
@@ -81,19 +77,6 @@ namespace NeoSharp.Application.Client
 
         #endregion
 
-        #region Cache
-
-        /// <summary>
-        /// Static constructor
-        /// </summary>
-        static Prompt()
-        {
-            _commandCache = new Dictionary<string[], PromptCommandAttribute>();
-            _commandCache.Cache(typeof(Prompt), out _commandAutocompleteCache);
-        }
-
-        #endregion
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -102,16 +85,15 @@ namespace NeoSharp.Application.Client
         /// <param name="consoleWriterInit">Console writer init</param>
         /// <param name="logger">Logger</param>
         /// <param name="blockchain">Blockchain</param>
-        /// <param name="walletManager"></param>
         /// <param name="vmFactory">VM Factory</param>
         public Prompt
             (
             IContainer container,
+            PromptControllerFactory controllers,
             IConsoleReader consoleReaderInit,
             IConsoleWriter consoleWriterInit,
             Core.Logging.ILogger<Prompt> logger,
             IBlockchain blockchain,
-            IWalletManager walletManager,
             IVMFactory vmFactory
             )
         {
@@ -121,8 +103,18 @@ namespace NeoSharp.Application.Client
             _logger = logger;
             _blockchain = blockchain;
             _logs = new ConcurrentBag<LogEntry>();
-            _walletManager = walletManager;
             _vmFactory = vmFactory;
+
+            // Get controllers
+
+            _commandAutocompleteCache = new AutoCommandComplete();
+            _commandCache = new Dictionary<string[], PromptCommandAttribute>();
+            _commandCache.Cache(this, _commandAutocompleteCache);
+
+            foreach (var controller in controllers)
+            {
+                _commandCache.Cache(container.Resolve(controller), _commandAutocompleteCache);
+            }
         }
 
         /// <inheritdoc />
@@ -204,7 +196,7 @@ namespace NeoSharp.Application.Client
 
                         // Invoke
 
-                        var ret = cmd.Method.Invoke(this, cmd.ConvertToArguments(cmdArgs.Skip(cmd.TokensCount).ToArray(), _container));
+                        var ret = cmd.Method.Invoke(cmd.Instance, cmd.ConvertToArguments(cmdArgs.Skip(cmd.TokensCount).ToArray(), _container));
 
                         if (ret is Task task)
                         {

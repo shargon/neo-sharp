@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NeoSharp.Application.Attributes;
+using NeoSharp.Application.Client;
 using NeoSharp.Application.Extensions;
 using NeoSharp.Core.DI;
 using NeoSharp.Core.Extensions;
@@ -44,8 +45,9 @@ namespace NeoSharp.Application.Test
 
             // cache
 
+            var autoComplete = new AutoCommandComplete();
             var cache = new Dictionary<string[], PromptCommandAttribute>();
-            cache.Cache(typeof(DummyPrompt), out var autoComplete);
+            cache.Cache(typeof(DummyPrompt), autoComplete);
 
             var cmds = cache.SearchCommands(cmdArgs).ToArray();
 
@@ -66,8 +68,9 @@ namespace NeoSharp.Application.Test
 
             // cache
 
+            var autoComplete = new AutoCommandComplete();
             var cache = new Dictionary<string[], PromptCommandAttribute>();
-            cache.Cache(typeof(DummyPrompt), out var autoComplete);
+            cache.Cache(typeof(DummyPrompt), autoComplete);
 
             var cmds = cache.SearchCommands(cmdArgs).ToArray();
 
@@ -101,8 +104,9 @@ namespace NeoSharp.Application.Test
 
             // cache
 
+            var autoComplete = new AutoCommandComplete();
             var cache = new Dictionary<string[], PromptCommandAttribute>();
-            cache.Cache(typeof(DummyPrompt), out var autoComplete);
+            cache.Cache(typeof(DummyPrompt), autoComplete);
 
             var cmds = cache.SearchCommands(cmdArgs).ToArray();
 
@@ -128,7 +132,8 @@ namespace NeoSharp.Application.Test
         {
             var cache = new Dictionary<string[], PromptCommandAttribute>();
 
-            cache.Cache(typeof(DummyPrompt), out var autoComplete);
+            var autoComplete = new AutoCommandComplete();
+            cache.Cache(typeof(DummyPrompt), autoComplete);
 
             Assert.AreEqual(3, cache.Count);
             Assert.AreEqual("mul,sum,sum", string.Join(",", cache.Keys.Select(u => string.Join(",", u))));

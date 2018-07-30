@@ -1,10 +1,32 @@
-using NeoSharp.Application.Attributes;
+﻿using NeoSharp.Application.Attributes;
+using NeoSharp.Application.Client;
 using NeoSharp.Core.Types;
+using NeoSharp.Core.Wallet;
 
-namespace NeoSharp.Application.Client
+namespace NeoSharp.Application.Controllers
 {
-    public partial class Prompt : IPrompt
+    public class PromptWalletController : IPromptController
     {
+        /// <summary>
+        /// The wallet.
+        /// </summary>
+        private readonly IWalletManager _walletManager;
+        private readonly IConsoleWriter _consoleWriter;
+        private readonly IConsoleReader _consoleReader;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="walletManager">Wallet manager</param>
+        /// <param name="consoleWriter">Console writter</param>
+        /// <param name="consoleReader">Console reader</param>
+        public PromptWalletController(IWalletManager walletManager, IConsoleWriter consoleWriter, IConsoleReader consoleReader)
+        {
+            _walletManager = walletManager;
+            _consoleReader = consoleReader;
+            _consoleWriter = consoleWriter;
+        }
+
         [PromptCommand("wallet create", Category = "Wallet", Help = "Create a new wallet")]
         private void WalletCreateCommand(string fileName)
         {
@@ -46,23 +68,23 @@ namespace NeoSharp.Application.Client
             var currentWallet = _walletManager.Wallet;
             _consoleWriter.WriteObject(currentWallet, output);
         }
-        
+
         [PromptCommand("wallet save", Category = "Wallet", Help = "Saves the open wallet into a new file")]
         private void WalletSaveCommand(string fileName)
         {
             _walletManager.ExportWallet(fileName);
         }
-        
+
         [PromptCommand("account create", Category = "Account", Help = "Create a new account")]
         private void AccountCreateCommand()
-        {    
+        {
             var secureString = _consoleReader.ReadPassword();
             _walletManager.CreateAccount(secureString);
         }
-        
+
         [PromptCommand("account delete", Category = "Account", Help = "Deletes an account")]
         private void AccountDeleteCommand(UInt160 scriptHash)
-        {    
+        {
             _walletManager.DeleteAccount(scriptHash);
         }
 

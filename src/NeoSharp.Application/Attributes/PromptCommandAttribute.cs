@@ -75,6 +75,10 @@ namespace NeoSharp.Application.Attributes
         #region Properties
 
         /// <summary>
+        /// Instance
+        /// </summary>
+        public object Instance;
+        /// <summary>
         /// Command
         /// </summary>
         public readonly string Command;
@@ -123,11 +127,13 @@ namespace NeoSharp.Application.Attributes
         /// <summary>
         /// Set Method
         /// </summary>
+        /// <param name="instance">Instance</param>
         /// <param name="method">Method</param>
-        internal void SetMethod(MethodInfo method)
+        internal void SetMethod(object instance, MethodInfo method)
         {
             if (method == null) return;
 
+            Instance = instance;
             Method = method;
             Parameters = method.GetParameters();
         }

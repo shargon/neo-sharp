@@ -12,11 +12,9 @@ namespace NeoSharp.Application.Extensions
 {
     public static class CacheExtensions
     {
-        public static void Cache(this IDictionary<string[], PromptCommandAttribute> cache, Type type, out IAutoCompleteHandler autoComplete)
+        public static void Cache(this IDictionary<string[], PromptCommandAttribute> cache, object instance, IAutoCompleteHandler autoComplete)
         {
-            var commandAutocompleteCache = new Dictionary<string, List<ParameterInfo[]>>();
-
-            foreach (var mi in type.GetMethods
+            foreach (var mi in instance.GetType().GetMethods
                 (
                 BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance
                 ))
@@ -25,13 +23,14 @@ namespace NeoSharp.Application.Extensions
 
                 if (atr == null) continue;
 
-                atr.SetMethod(mi);
-
+                atr.SetMethod(instance, mi);
                 cache.Add(atr.Commands, atr);
 
-                if (commandAutocompleteCache.ContainsKey(atr.Command))
+                if (autoComplete == null) continue;
+
+                if (autoComplete.TryGetValue(atr.Command, out var value))
                 {
-                    commandAutocompleteCache[atr.Command].Add(mi.GetParameters());
+                    value.Add(mi.GetParameters());
                 }
                 else
                 {
@@ -40,11 +39,9 @@ namespace NeoSharp.Application.Extensions
                         mi.GetParameters()
                     };
 
-                    commandAutocompleteCache.Add(atr.Command, ls);
+                    autoComplete.Add(atr.Command, ls);
                 }
             }
-
-            autoComplete = new AutoCommandComplete(commandAutocompleteCache);
         }
 
         public static T SearchRightCommand<T>(this T[] cmds, IEnumerable<CommandToken> args, IContainer injector) where T : PromptCommandAttribute
