@@ -6,14 +6,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NeoSharp.Application.Attributes;
 using NeoSharp.Application.Extensions;
-using NeoSharp.BinarySerialization;
 using NeoSharp.Core.Blockchain;
-using NeoSharp.Core.Blockchain.Processors;
 using NeoSharp.Core.DI;
 using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Logging;
-using NeoSharp.Core.Network;
-using NeoSharp.Core.Network.Rpc;
 using NeoSharp.Core.Types;
 using NeoSharp.Core.Wallet;
 using NeoSharp.VM;
@@ -48,7 +44,6 @@ namespace NeoSharp.Application.Client
         /// Blockchain
         /// </summary>
         private readonly IBlockchain _blockchain;
-
         /// <summary>
         /// The wallet.
         /// </summary>
@@ -61,12 +56,17 @@ namespace NeoSharp.Application.Client
         /// Command cache
         /// </summary>
         private static readonly IDictionary<string[], PromptCommandAttribute> _commandCache;
+        /// <summary>
+        /// Autocomplete handler
+        /// </summary>
         private static readonly IAutoCompleteHandler _commandAutocompleteCache;
+        /// <summary>
+        /// Log for output
+        /// </summary>
+        private readonly ConcurrentBag<LogEntry> _logs;
 
         public delegate void delOnCommandRequested(IPrompt prompt, PromptCommandAttribute cmd, string commandLine);
         public event delOnCommandRequested OnCommandRequested;
-
-        private readonly ConcurrentBag<LogEntry> _logs;
 
         private static readonly Dictionary<LogLevel, ConsoleOutputStyle> _logStyle = new Dictionary<LogLevel, ConsoleOutputStyle>()
         {
