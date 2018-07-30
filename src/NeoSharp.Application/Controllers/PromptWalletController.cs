@@ -7,12 +7,16 @@ namespace NeoSharp.Application.Controllers
 {
     public class PromptWalletController : IPromptController
     {
+        #region Private fields
+
         /// <summary>
         /// The wallet.
         /// </summary>
         private readonly IWalletManager _walletManager;
         private readonly IConsoleWriter _consoleWriter;
         private readonly IConsoleReader _consoleReader;
+
+        #endregion
 
         /// <summary>
         /// Constructor

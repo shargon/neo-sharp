@@ -244,7 +244,7 @@ namespace NeoSharp.Application.Client
         /// Clear
         /// </summary>
         [PromptCommand("clear", Help = "clear output", Category = "Usability")]
-        private void ClearCommand()
+        public void ClearCommand()
         {
             _consoleWriter.Clear();
         }
@@ -254,7 +254,7 @@ namespace NeoSharp.Application.Client
         /// </summary>
         /// <param name="commandsFile">File</param>
         [PromptCommand("load", Help = "Play stored commands", Category = "Usability")]
-        private void LoadCommand(FileInfo commandsFile)
+        public void LoadCommand(FileInfo commandsFile)
         {
             if (!commandsFile.Exists)
             {
@@ -280,9 +280,9 @@ namespace NeoSharp.Application.Client
         /// Exit prompt
         /// </summary>
         [PromptCommand("quit", Category = "Usability")]
-        private void QuitCommand([PromptHideHelpCommand] INetworkManager networkManager)
+        public void QuitCommand([PromptHideHelpCommand] INetworkManager networkManager)
         {
-            NetworkStopCommand(networkManager);
+            networkManager?.StopNetwork();
             _exit = true;
         }
 
@@ -290,9 +290,9 @@ namespace NeoSharp.Application.Client
         /// Exit prompt
         /// </summary>
         [PromptCommand("exit", Category = "Usability")]
-        private void ExitCommand([PromptHideHelpCommand] INetworkManager networkManager)
+        public void ExitCommand([PromptHideHelpCommand] INetworkManager networkManager)
         {
-            NetworkStopCommand(networkManager);
+            networkManager?.StopNetwork();
             _exit = true;
         }
 
@@ -300,7 +300,7 @@ namespace NeoSharp.Application.Client
         /// Show help
         /// </summary>
         [PromptCommand("help", Category = "Usability", Help = "Show help for commands")]
-        private void HelpCommand([PromptCommandParameterBody]string command)
+        public void HelpCommand([PromptCommandParameterBody]string command)
         {
             if (!string.IsNullOrWhiteSpace(command))
             {
@@ -323,7 +323,7 @@ namespace NeoSharp.Application.Client
         /// Show help
         /// </summary>
         [PromptCommand("help", Category = "Usability", Help = "Show help for commands")]
-        private void HelpCommand()
+        public void HelpCommand()
         {
             string lastCat = null, lastCom = null;
             foreach (var key in _commandCache.Keys.OrderBy(u => _commandCache[u].Category + "\n" + string.Join("", u)))
