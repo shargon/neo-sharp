@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace NeoSharp.Application.Controllers
+namespace NeoSharp.Application.Client
 {
     public class PromptControllerFactory : IEnumerable<Type>
     {

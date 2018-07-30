@@ -1,4 +1,4 @@
-﻿namespace NeoSharp.Application.Controllers
+﻿namespace NeoSharp.Application.Client
 {
     public interface IPromptController
     {
