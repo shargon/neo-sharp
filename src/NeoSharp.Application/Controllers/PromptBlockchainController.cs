@@ -1,14 +1,40 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using NeoSharp.Application.Attributes;
+using NeoSharp.Application.Client;
+using NeoSharp.Core.Blockchain;
 using NeoSharp.Core.Blockchain.Processors;
 using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Types;
 
-namespace NeoSharp.Application.Client
+namespace NeoSharp.Application.Controllers
 {
-    public partial class Prompt : IPrompt
+    public class PromptBlockchainController : IPromptController
     {
+        #region Private fields
+
+        private readonly IBlockPool _blockPool;
+        private readonly IBlockchain _blockchain;
+        private readonly IConsoleWriter _consoleWriter;
+        private readonly IConsoleReader _consoleReader;
+
+        #endregion
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="blockchain">Blockchain</param>
+        /// <param name="blockPool">Block pool</param>
+        /// <param name="consoleWriter">Console writter</param>
+        /// <param name="consoleReader">Console reader</param>
+        public PromptBlockchainController(IBlockchain blockchain, IBlockPool blockPool, IConsoleWriter consoleWriter, IConsoleReader consoleReader)
+        {
+            _blockPool = blockPool;
+            _blockchain = blockchain;
+            _consoleReader = consoleReader;
+            _consoleWriter = consoleWriter;
+        }
+
         void WriteStatePercent(string title, string msg, long? value, long? max)
         {
             if (!value.HasValue || !max.HasValue)
@@ -34,10 +60,10 @@ namespace NeoSharp.Application.Client
         /// Show state
         /// </summary>
         [PromptCommand("state", Category = "Blockchain", Help = "Show current state")]
-        private void StateCommand([PromptHideHelpCommand] IBlockPool blockPool)
+        public void StateCommand()
         {
             var memStr = FormatState(_blockchain.MemoryPool?.Count);
-            var blockStr = FormatState(blockPool.Size);
+            var blockStr = FormatState(_blockPool.Size);
             var headStr = FormatState(_blockchain.LastBlockHeader?.Index);
             var blStr = FormatState(_blockchain.CurrentBlock?.Index);
             var blIndex = FormatState(0); // TODO: Change me
@@ -48,7 +74,7 @@ namespace NeoSharp.Application.Client
             _consoleWriter.WriteLine("");
 
             WriteStatePercent(" Memory", memStr.PadLeft(numSpaces, ' '), _blockchain.MemoryPool.Count, _blockchain.MemoryPool.Max);
-            WriteStatePercent(" Blocks", blockStr.PadLeft(numSpaces, ' '), blockPool.Size, blockPool.Capacity);
+            WriteStatePercent(" Blocks", blockStr.PadLeft(numSpaces, ' '), _blockPool.Size, _blockPool.Capacity);
 
             _consoleWriter.WriteLine("");
             _consoleWriter.WriteLine("Heights", ConsoleOutputStyle.Information);
@@ -66,7 +92,7 @@ namespace NeoSharp.Application.Client
         /// <param name="blockIndex">Index</param>
         /// <param name="output">Output</param>
         [PromptCommand("header", Category = "Blockchain", Help = "Get header by index or by hash")]
-        private async Task HeaderCommand(uint blockIndex, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task HeaderCommand(uint blockIndex, PromptOutputStyle output = PromptOutputStyle.json)
         {
             _consoleWriter.WriteObject(await _blockchain?.GetBlockHeader(blockIndex), output);
         }
@@ -77,7 +103,7 @@ namespace NeoSharp.Application.Client
         /// <param name="blockHash">Hash</param>
         /// <param name="output">Output</param>
         [PromptCommand("header", Category = "Blockchain", Help = "Get header by index or by hash")]
-        private async Task HeaderCommand(UInt256 blockHash, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task HeaderCommand(UInt256 blockHash, PromptOutputStyle output = PromptOutputStyle.json)
         {
             _consoleWriter.WriteObject(await _blockchain?.GetBlockHeader(blockHash), output);
         }
@@ -88,7 +114,7 @@ namespace NeoSharp.Application.Client
         /// <param name="blockIndex">Index</param>
         /// <param name="output">Output</param>
         [PromptCommand("block", Category = "Blockchain", Help = "Get block by index or by hash")]
-        private async Task BlockCommand(uint blockIndex, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task BlockCommand(uint blockIndex, PromptOutputStyle output = PromptOutputStyle.json)
         {
             _consoleWriter.WriteObject(await _blockchain?.GetBlock(blockIndex), output);
         }
@@ -99,7 +125,7 @@ namespace NeoSharp.Application.Client
         /// <param name="blockHash">Hash</param>
         /// <param name="output">Output</param>
         [PromptCommand("block", Category = "Blockchain", Help = "Get block by index or by hash")]
-        private async Task BlockCommand(UInt256 blockHash, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task BlockCommand(UInt256 blockHash, PromptOutputStyle output = PromptOutputStyle.json)
         {
             _consoleWriter.WriteObject(await _blockchain?.GetBlock(blockHash), output);
         }
@@ -110,7 +136,7 @@ namespace NeoSharp.Application.Client
         /// <param name="hash">Hash</param>
         /// <param name="output">Output</param>
         [PromptCommand("tx", Category = "Blockchain", Help = "Get tx")]
-        private async Task TxCommand(UInt256 hash, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task TxCommand(UInt256 hash, PromptOutputStyle output = PromptOutputStyle.json)
         {
             _consoleWriter.WriteObject(await _blockchain?.GetTransaction(hash), output);
         }
@@ -122,7 +148,7 @@ namespace NeoSharp.Application.Client
         /// <param name="txNumber">TxNumber</param>
         /// <param name="output">Output</param>
         [PromptCommand("tx", Category = "Blockchain", Help = "Get tx by block num/tx number")]
-        private async Task TxCommand(uint blockIndex, ushort txNumber, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task TxCommand(uint blockIndex, ushort txNumber, PromptOutputStyle output = PromptOutputStyle.json)
         {
             var block = await _blockchain.GetBlock(blockIndex);
             _consoleWriter.WriteObject(block.Transactions?[txNumber], output);
@@ -134,7 +160,7 @@ namespace NeoSharp.Application.Client
         /// <param name="hash">Hash</param>
         /// <param name="output">Output</param>
         [PromptCommand("asset", Category = "Blockchain", Help = "Get asset", Order = 0)]
-        private async Task AssetCommand(UInt256 hash, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task AssetCommand(UInt256 hash, PromptOutputStyle output = PromptOutputStyle.json)
         {
             _consoleWriter.WriteObject(await _blockchain?.GetAsset(hash), output);
         }
@@ -146,7 +172,7 @@ namespace NeoSharp.Application.Client
         /// <param name="mode">Regex/Contains</param>
         /// <param name="output">Output</param>
         [PromptCommand("asset", Category = "Blockchain", Help = "Get asset", Order = 1)]
-        private async Task AssetCommand(string query, EnumerableExtensions.QueryMode mode = EnumerableExtensions.QueryMode.Contains, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task AssetCommand(string query, EnumerableExtensions.QueryMode mode = EnumerableExtensions.QueryMode.Contains, PromptOutputStyle output = PromptOutputStyle.json)
         {
             var assets = await _blockchain?.GetAssets();
             var result = assets.QueryResult(query, mode).ToArray();
@@ -160,7 +186,7 @@ namespace NeoSharp.Application.Client
         /// <param name="hash">Hash</param>
         /// <param name="output">Output</param>
         [PromptCommand("contract", Category = "Blockchain", Help = "Get asset", Order = 0)]
-        private async Task ContractCommand(UInt160 hash, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task ContractCommand(UInt160 hash, PromptOutputStyle output = PromptOutputStyle.json)
         {
             _consoleWriter.WriteObject(await _blockchain?.GetContract(hash), output);
         }
@@ -172,7 +198,7 @@ namespace NeoSharp.Application.Client
         /// <param name="mode">Regex/Contains</param>
         /// <param name="output">Output</param>
         [PromptCommand("contract", Category = "Blockchain", Help = "Get asset", Order = 1)]
-        private async Task ContractCommand(string query, EnumerableExtensions.QueryMode mode = EnumerableExtensions.QueryMode.Contains, PromptOutputStyle output = PromptOutputStyle.json)
+        public async Task ContractCommand(string query, EnumerableExtensions.QueryMode mode = EnumerableExtensions.QueryMode.Contains, PromptOutputStyle output = PromptOutputStyle.json)
         {
             var contracts = await _blockchain?.GetContracts();
             var result = contracts.QueryResult(query, mode).ToArray();
