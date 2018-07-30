@@ -11,6 +11,7 @@ using NeoSharp.Application.Attributes;
 using NeoSharp.Application.Extensions;
 using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Logging;
+using NeoSharp.Core.Network;
 using NeoSharp.Core.Types;
 
 namespace NeoSharp.Application.Client
@@ -279,9 +280,9 @@ namespace NeoSharp.Application.Client
         /// Exit prompt
         /// </summary>
         [PromptCommand("quit", Category = "Usability")]
-        private void QuitCommand()
+        private void QuitCommand([PromptHideHelpCommand] INetworkManager networkManager)
         {
-            NetworkStopCommand();
+            NetworkStopCommand(networkManager);
             _exit = true;
         }
 
@@ -289,9 +290,9 @@ namespace NeoSharp.Application.Client
         /// Exit prompt
         /// </summary>
         [PromptCommand("exit", Category = "Usability")]
-        private void ExitCommand()
+        private void ExitCommand([PromptHideHelpCommand] INetworkManager networkManager)
         {
-            NetworkStopCommand();
+            NetworkStopCommand(networkManager);
             _exit = true;
         }
 
