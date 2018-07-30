@@ -28,7 +28,7 @@ namespace NeoSharp.Application.Controllers
         }
 
         [PromptCommand("wallet create", Category = "Wallet", Help = "Create a new wallet")]
-        private void WalletCreateCommand(string fileName)
+        public void WalletCreateCommand(string fileName)
         {
             _walletManager.CreateWallet(fileName);
             var secureString = _consoleReader.ReadPassword();
@@ -36,33 +36,33 @@ namespace NeoSharp.Application.Controllers
         }
 
         [PromptCommand("wallet open", Category = "Wallet", Help = "Open wallet")]
-        private void WalletOpenCommand(string fileName)
+        public void WalletOpenCommand(string fileName)
         {
             _walletManager.Load(fileName);
         }
 
         [PromptCommand("wallet close", Category = "Wallet", Help = "Close wallet")]
-        private void WalletCloseCommand()
+        public void WalletCloseCommand()
         {
             _walletManager.Close();
         }
 
         [PromptCommand("import wif", Category = "Wallet", Help = "Close wallet")]
-        private void ImportWif(string wif)
+        public void ImportWif(string wif)
         {
             var secureString = _consoleReader.ReadPassword();
             _walletManager.ImportWif(wif, secureString);
         }
 
         [PromptCommand("import nep2", Category = "Wallet", Help = "Close wallet")]
-        private void ImportNep2(string nep2key)
+        public void ImportNep2(string nep2key)
         {
             var secureString = _consoleReader.ReadPassword();
             _walletManager.ImportEncryptedWif(nep2key, secureString);
         }
 
         [PromptCommand("wallet", Category = "Wallet", Help = "List all accounts from wallet")]
-        private void WalletListAccountCommand(PromptOutputStyle output = PromptOutputStyle.json)
+        public void WalletListAccountCommand(PromptOutputStyle output = PromptOutputStyle.json)
         {
             _walletManager.CheckWalletIsOpen();
             var currentWallet = _walletManager.Wallet;
@@ -70,20 +70,20 @@ namespace NeoSharp.Application.Controllers
         }
 
         [PromptCommand("wallet save", Category = "Wallet", Help = "Saves the open wallet into a new file")]
-        private void WalletSaveCommand(string fileName)
+        public void WalletSaveCommand(string fileName)
         {
             _walletManager.ExportWallet(fileName);
         }
 
         [PromptCommand("account create", Category = "Account", Help = "Create a new account")]
-        private void AccountCreateCommand()
+        public void AccountCreateCommand()
         {
             var secureString = _consoleReader.ReadPassword();
             _walletManager.CreateAccount(secureString);
         }
 
         [PromptCommand("account delete", Category = "Account", Help = "Deletes an account")]
-        private void AccountDeleteCommand(UInt160 scriptHash)
+        public void AccountDeleteCommand(UInt160 scriptHash)
         {
             _walletManager.DeleteAccount(scriptHash);
         }
