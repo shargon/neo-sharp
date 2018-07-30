@@ -41,10 +41,6 @@ namespace NeoSharp.Application.Client
         /// </summary>
         private readonly IBlockchain _blockchain;
         /// <summary>
-        /// Container
-        /// </summary>
-        private readonly IContainer _container;
-        /// <summary>
         /// Command cache
         /// </summary>
         private readonly IDictionary<string[], PromptCommandAttribute> _commandCache;
@@ -92,7 +88,6 @@ namespace NeoSharp.Application.Client
             IBlockchain blockchain
             )
         {
-            _container = container;
             _consoleReader = consoleReaderInit;
             _consoleWriter = consoleWriterInit;
             _logger = logger;
@@ -168,7 +163,7 @@ namespace NeoSharp.Application.Client
 
                 var cmdArgs = new List<CommandToken>(command.SplitCommandLine());
                 cmds = _commandCache.SearchCommands(cmdArgs).ToArray();
-                var cmd = cmds.SearchRightCommand(cmdArgs, _container);
+                var cmd = cmds.SearchRightCommand(cmdArgs, null);
 
                 if (cmd == null)
                 {
@@ -190,7 +185,7 @@ namespace NeoSharp.Application.Client
 
                         // Invoke
 
-                        var ret = cmd.Method.Invoke(cmd.Instance, cmd.ConvertToArguments(cmdArgs.Skip(cmd.TokensCount).ToArray(), _container));
+                        var ret = cmd.Method.Invoke(cmd.Instance, cmd.ConvertToArguments(cmdArgs.Skip(cmd.TokensCount).ToArray(), null));
 
                         if (ret is Task task)
                         {
