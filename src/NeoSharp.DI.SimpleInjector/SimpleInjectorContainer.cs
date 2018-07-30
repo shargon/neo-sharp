@@ -34,7 +34,6 @@ namespace NeoSharp.DI.SimpleInjector
             }
 
             obj = null;
-
             return false;
         }
     }
