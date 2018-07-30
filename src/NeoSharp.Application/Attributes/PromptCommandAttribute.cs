@@ -172,7 +172,7 @@ namespace NeoSharp.Application.Attributes
                     continue;
                 }
 
-                PromptCommandParameterBodyAttribute body = Parameters[xP].GetCustomAttribute<PromptCommandParameterBodyAttribute>();
+                var body = Parameters[xP].GetCustomAttribute<PromptCommandParameterBodyAttribute>();
 
                 if (body != null)
                 {
