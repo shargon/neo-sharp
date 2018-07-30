@@ -28,6 +28,13 @@ namespace NeoSharp.Core.Test.Extensions
             cmdArgs = command.SplitCommandLine().ToArray();
 
             CollectionAssert.AreEqual(new CommandToken[] { new CommandToken("sum numbers", true), new CommandToken("1"), new CommandToken("2") }, cmdArgs);
+
+            // quoted & escaping
+
+            command = "\"sum \\\"numbers\\\"\" 1 2";
+            cmdArgs = command.SplitCommandLine().ToArray();
+
+            CollectionAssert.AreEqual(new CommandToken[] { new CommandToken("sum \"numbers\"", true), new CommandToken("1"), new CommandToken("2") }, cmdArgs);
         }
 
         [TestMethod]
