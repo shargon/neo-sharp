@@ -8,6 +8,7 @@ using NeoSharp.Application.Attributes;
 using NeoSharp.BinarySerialization;
 using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Models;
+using NeoSharp.Core.Network.Rpc;
 using NeoSharp.Core.SmartContract.ContractParameters;
 using NeoSharp.Core.Types;
 using Newtonsoft.Json;
@@ -87,14 +88,14 @@ namespace NeoSharp.Application.Client
         /// <summary>
         /// Start rpc
         /// </summary>
-        [PromptCommand("rpc start", Category = "Rpc")]
-        private void RpcStartCommand() => _rpc?.Start();
+        [PromptCommand("rpc start", Category = "Rpc", Help = "Start rpc server")]
+        private void RpcStartCommand([PromptHideHelpCommand] IRpcServer rpc) => rpc?.Start();
 
         /// <summary>
         /// Stop rpc
         /// </summary>
-        [PromptCommand("rpc stop", Category = "Rpc")]
-        private void RpcStopCommand() => _rpc?.Stop();
+        [PromptCommand("rpc stop", Category = "Rpc", Help = "Stop rpc server")]
+        private void RpcStopCommand([PromptHideHelpCommand] IRpcServer rpc) => rpc?.Stop();
 
         #region Commands
 

@@ -1,4 +1,5 @@
 ﻿using NeoSharp.Application.Attributes;
+using NeoSharp.Core.Network;
 
 namespace NeoSharp.Application.Client
 {
@@ -25,18 +26,18 @@ namespace NeoSharp.Application.Client
         /// </summary>
         [PromptCommand("network start", Category = "Network")]
         // ReSharper disable once UnusedMember.Local
-        private void NetworkStartCommand()
+        private void NetworkStartCommand([PromptHideHelpCommand]INetworkManager networkManager)
         {
-            _networkManager?.StartNetwork();
+            networkManager?.StartNetwork();
         }
 
         /// <summary>
         /// Stop network
         /// </summary>
         [PromptCommand("network stop", Category = "Network")]
-        private void NetworkStopCommand()
+        private void NetworkStopCommand([PromptHideHelpCommand] INetworkManager networkManager)
         {
-            _networkManager?.StopNetwork();
+            networkManager?.StopNetwork();
         }
     }
 }

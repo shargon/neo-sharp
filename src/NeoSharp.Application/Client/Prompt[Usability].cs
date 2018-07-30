@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NeoSharp.Application.Attributes;
+using NeoSharp.Application.Extensions;
+using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Logging;
 using NeoSharp.Core.Types;
 
@@ -80,6 +83,8 @@ namespace NeoSharp.Application.Client
                     {
                         foreach (var par in v.Parameters)
                         {
+                            if (par.GetCustomAttribute<PromptHideHelpCommandAttribute>() != null) continue;
+
                             var allowed = "";
 
                             if (par.ParameterType.IsEnum)
@@ -107,8 +112,11 @@ namespace NeoSharp.Application.Client
                     // Options
 
                     _consoleWriter.WriteLine("Options:", ConsoleOutputStyle.Information);
+
                     foreach (var par in modes)
+                    {
                         _consoleWriter.WriteLine("  " + par, ConsoleOutputStyle.Information);
+                    }
                 }
             }
         }
@@ -116,16 +124,17 @@ namespace NeoSharp.Application.Client
         /// <summary>
         /// Enable / Disable logs
         /// </summary>
+        /// <param name="log">Log factory</param>
         /// <param name="mode">Mode</param>
         [PromptCommand("log", Help = "Enable/Disable log output", Category = "Usability")]
-        private void LogCommand(LogVerbose mode)
+        private void LogCommand([PromptHideHelpCommand] ILoggerFactoryExtended log, LogVerbose mode)
         {
             _logVerbose = mode;
 
             if (mode != LogVerbose.Off)
             {
-                _loggerFactory.OnLog -= Log_OnLog;
-                _loggerFactory.OnLog += Log_OnLog;
+                log.OnLog -= Log_OnLog;
+                log.OnLog += Log_OnLog;
 
                 _logger.LogDebug("Log output is enabled");
             }
@@ -134,7 +143,7 @@ namespace NeoSharp.Application.Client
                 _logs.Clear();
                 _logger.LogDebug("Log output is disabled");
 
-                _loggerFactory.OnLog -= Log_OnLog;
+                log.OnLog -= Log_OnLog;
             }
         }
 
@@ -294,8 +303,8 @@ namespace NeoSharp.Application.Client
         {
             if (!string.IsNullOrWhiteSpace(command))
             {
-                var cmdArgs = new List<CommandToken>();
-                var cmds = SearchCommands(command, cmdArgs).ToArray();
+                var cmdArgs = new List<CommandToken>(command.SplitCommandLine());
+                var cmds = _commandCache.SearchCommands(cmdArgs).ToArray();
 
                 if (cmds.Length == 0)
                 {

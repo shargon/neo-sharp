@@ -1,12 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Reflection;
+using NeoSharp.Core.DI;
 using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Types;
 using Newtonsoft.Json;
@@ -101,11 +101,11 @@ namespace NeoSharp.Application.Attributes
         /// <summary>
         /// Parameters
         /// </summary>
-        internal ParameterInfo[] Parameters { get; private set; }
+        public ParameterInfo[] Parameters { get; private set; }
         /// <summary>
         /// Method
         /// </summary>
-        internal MethodInfo Method { get; private set; }
+        public MethodInfo Method { get; private set; }
 
         #endregion
 
@@ -136,48 +136,57 @@ namespace NeoSharp.Application.Attributes
         /// Convert string arguments to Method arguments
         /// </summary>
         /// <param name="args">Arguments</param>
+        /// <param name="injector">Injector</param>
         /// <returns>Return parsed arguments</returns>
-        public object[] ConvertToArguments(CommandToken[] args)
+        public object[] ConvertToArguments(CommandToken[] args, IContainer injector)
         {
             var maxPars = Parameters.Length;
             var ret = new object[maxPars];
+            var injected = new List<int>();
 
             // Fill default parameters
 
             for (var x = 0; x < ret.Length; x++)
+            {
                 if (Parameters[x].HasDefaultValue)
                 {
                     ret[x] = Parameters[x].DefaultValue;
                 }
+                else
+                {
+                    if (injector != null && injector.TryResolve(Parameters[x].ParameterType, out var obj))
+                    {
+                        ret[x] = obj;
+                        injected.Add(x);
+                    }
+                }
+            }
 
             // Fill argument values
 
-            for (int x = 0, amax = Math.Min(args.Length, maxPars); x < amax; x++)
+            for (int xP = 0, xA = 0; xP < maxPars && xA < args.Length; xP++, xA++)
             {
-                var body = Parameters[x].GetCustomAttribute<PromptCommandParameterBodyAttribute>();
+                if (injected.Contains(xP))
+                {
+                    xA--;
+                    continue;
+                }
+
+                PromptCommandParameterBodyAttribute body = Parameters[xP].GetCustomAttribute<PromptCommandParameterBodyAttribute>();
 
                 if (body != null)
                 {
                     // From here to the end
 
-                    var join = string.Join(" ", args.Skip(x));
+                    var join = string.Join(" ", args.Skip(xA));
 
                     if (body.FromJson)
                     {
-                        join = join.Trim();
-
-                        if (Parameters[x].ParameterType.IsArray && !(join.StartsWith("[") && join.EndsWith("]")))
-                        {
-                            // Is an array but only one object is given
-
-                            join = $"[{join}]";
-                        }
-
-                        ret[x] = JsonConvert.DeserializeObject(join, Parameters[x].ParameterType);
+                        ret[xP] = JsonConvert.DeserializeObject(join, Parameters[xP].ParameterType);
                     }
                     else
                     {
-                        ret[x] = ParseToArgument(new CommandToken(join, false), Parameters[x].ParameterType);
+                        ret[xP] = ParseToArgument(new CommandToken(join, false), Parameters[xP].ParameterType);
                     }
 
                     return ret;
@@ -186,17 +195,19 @@ namespace NeoSharp.Application.Attributes
                 {
                     // Regular parameter
 
-                    ret[x] = ParseToArgument(args[x], Parameters[x].ParameterType);
+                    ret[xP] = ParseToArgument(args[xA], Parameters[xP].ParameterType);
                 }
             }
 
             // Check null values
 
-            for (int x = 0, max = Parameters.Length; x < max; x++)
+            for (var x = 0; x < maxPars; x++)
+            {
                 if (!Parameters[x].HasDefaultValue && ret[x] == null)
                 {
                     throw (new Exception($"Missing parameter value <{Parameters[x].Name}>"));
                 }
+            }
 
             return ret;
         }
@@ -237,8 +248,7 @@ namespace NeoSharp.Application.Attributes
         {
             if (arrays.Count > 0)
             {
-                var ls = arrays.Peek();
-                ls.Add(obj);
+                arrays.Peek().Add(obj);
             }
             else
             {
@@ -431,7 +441,7 @@ namespace NeoSharp.Application.Attributes
 
             // Is Convertible
 
-            var conv = TypeDescriptor.GetConverter(type);
+            var conv = System.ComponentModel.TypeDescriptor.GetConverter(type);
 
             if (conv.CanConvertFrom(_stringType))
             {
