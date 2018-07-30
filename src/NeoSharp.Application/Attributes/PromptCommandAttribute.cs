@@ -85,7 +85,7 @@ namespace NeoSharp.Application.Attributes
         /// <summary>
         /// Command Length
         /// </summary>
-        public readonly int CommandLength;
+        public readonly int TokensCount;
         /// <summary>
         /// Help
         /// </summary>
@@ -117,7 +117,7 @@ namespace NeoSharp.Application.Attributes
         {
             Command = command.ToLowerInvariant();
             Commands = Command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            CommandLength = Commands.Length;
+            TokensCount = Commands.Length;
         }
 
         /// <summary>

@@ -63,7 +63,7 @@ namespace NeoSharp.Application.Extensions
                         {
                             try
                             {
-                                a.ConvertToArguments(args.Skip(a.CommandLength).ToArray(), injector);
+                                a.ConvertToArguments(args.Skip(a.TokensCount).ToArray(), injector);
 
                                 if (cmd == null || cmd.Order > a.Order)
                                     cmd = a;

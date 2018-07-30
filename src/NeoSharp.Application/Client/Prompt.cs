@@ -204,7 +204,7 @@ namespace NeoSharp.Application.Client
 
                         // Invoke
 
-                        var ret = cmd.Method.Invoke(this, cmd.ConvertToArguments(cmdArgs.Skip(cmd.CommandLength).ToArray(), _container));
+                        var ret = cmd.Method.Invoke(this, cmd.ConvertToArguments(cmdArgs.Skip(cmd.TokensCount).ToArray(), _container));
 
                         if (ret is Task task)
                         {
