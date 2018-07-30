@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using NeoSharp.Application.Attributes;
+using NeoSharp.Core.Blockchain.Processors;
 using NeoSharp.Core.Extensions;
 using NeoSharp.Core.Types;
 
@@ -33,10 +34,10 @@ namespace NeoSharp.Application.Client
         /// Show state
         /// </summary>
         [PromptCommand("state", Category = "Blockchain", Help = "Show current state")]
-        private void StateCommand()
+        private void StateCommand([PromptHideHelpCommand] IBlockPool blockPool)
         {
             var memStr = FormatState(_blockchain.MemoryPool?.Count);
-            var blockStr = FormatState(_blockPool.Size);
+            var blockStr = FormatState(blockPool.Size);
             var headStr = FormatState(_blockchain.LastBlockHeader?.Index);
             var blStr = FormatState(_blockchain.CurrentBlock?.Index);
             var blIndex = FormatState(0); // TODO: Change me
@@ -47,7 +48,7 @@ namespace NeoSharp.Application.Client
             _consoleWriter.WriteLine("");
 
             WriteStatePercent(" Memory", memStr.PadLeft(numSpaces, ' '), _blockchain.MemoryPool.Count, _blockchain.MemoryPool.Max);
-            WriteStatePercent(" Blocks", blockStr.PadLeft(numSpaces, ' '), _blockPool.Size, _blockPool.Capacity);
+            WriteStatePercent(" Blocks", blockStr.PadLeft(numSpaces, ' '), blockPool.Size, blockPool.Capacity);
 
             _consoleWriter.WriteLine("");
             _consoleWriter.WriteLine("Heights", ConsoleOutputStyle.Information);

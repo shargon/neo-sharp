@@ -52,10 +52,6 @@ namespace NeoSharp.Application.Client
         /// Blockchain
         /// </summary>
         private readonly IBlockchain _blockchain;
-        /// <summary>
-        /// Block Pool
-        /// </summary>
-        private readonly IBlockPool _blockPool;
 
         /// <summary>
         /// The wallet.
@@ -105,13 +101,12 @@ namespace NeoSharp.Application.Client
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="container">Container</param>
         /// <param name="consoleReaderInit">Console reader init</param>
         /// <param name="consoleWriterInit">Console writer init</param>
         /// <param name="logger">Logger</param>
         /// <param name="serverInit">Server</param>
-        /// <param name="rpcInit">Rpc server</param>
         /// <param name="blockchain">Blockchain</param>
-        /// <param name="blockPool">Block pool</param>
         /// <param name="walletManager"></param>
         /// <param name="vmFactory">VM Factory</param>
         public Prompt(
@@ -121,7 +116,6 @@ namespace NeoSharp.Application.Client
             Core.Logging.ILogger<Prompt> logger,
             IServer serverInit,
             IBlockchain blockchain,
-            IBlockPool blockPool,
             IWalletManager walletManager,
             IVMFactory vmFactory)
         {
@@ -131,7 +125,6 @@ namespace NeoSharp.Application.Client
             _logger = logger;
             _server = serverInit;
             _blockchain = blockchain;
-            _blockPool = blockPool;
             _logs = new ConcurrentBag<LogEntry>();
             _walletManager = walletManager;
             _vmFactory = vmFactory;
